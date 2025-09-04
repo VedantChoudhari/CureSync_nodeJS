@@ -1,4 +1,7 @@
 const Doctor = require('../models/Doctor');
+const { Parser } = require('json2csv');
+const fs = require('fs');
+const path = require('path');
 
 // Create a new doctor
 exports.createDoctor = async (req, res) => {
@@ -51,6 +54,34 @@ exports.deleteDoctor = async (req, res) => {
     if (!doctor) return res.status(404).json({ error: 'Doctor not found' });
     await doctor.destroy();
     res.json({ message: 'Doctor deleted' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
+// doctor csv
+exports.exportDoctorsCSV = async (req, res) => {
+  try {
+    const doctors = await Doctor.findAll();
+
+    const data = doctors.map(d => ({
+      id: d.id,
+      name: d.name,
+      specialization: d.specialization,
+      email: d.email,
+      phone: d.phone,
+      status: d.status
+    }));
+
+    const fields = ['id', 'name', 'specialization', 'email', 'phone', 'status'];
+    const parser = new Parser({ fields });
+    const csv = parser.parse(data);
+
+    const filePath = path.join(__dirname, '../../uploads/doctors.csv');
+    fs.writeFileSync(filePath, csv);
+
+    res.download(filePath, 'doctors.csv');
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

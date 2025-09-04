@@ -59,3 +59,36 @@ exports.deleteOPD = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+
+
+
+// Get OPDs filtered by doctorId
+exports.getOPDsByDoctor = async (req, res) => {
+  try {
+    const { doctorId } = req.query;
+    if (!doctorId) return res.status(400).json({ error: 'doctorId query parameter required' });
+
+    const opds = await OPD.findAll({
+      where: { doctorId }
+    });
+
+    res.json(opds);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
+exports.getOPDsBySpecialization = async (req, res) => {
+  try {
+    const { specialization } = req.query;
+    const where = {};
+    if (specialization) where.specialization = specialization;
+
+    const opds = await OPD.findAll({ where });
+    res.json(opds);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};

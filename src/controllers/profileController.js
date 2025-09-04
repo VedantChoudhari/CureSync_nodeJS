@@ -1,11 +1,25 @@
 const Profile = require('../models/Profile');
 const User = require('../models/User');
+const fs = require('fs');
+const path = require('path');
 
 // Create a new profile
 exports.createProfile = async (req, res) => {
   try {
-    const { userId, name, gender, age, dateOfBirth, bloodGroup, profileImage, phoneNumber, address } = req.body;
-    const profile = await Profile.create({ userId, name, gender, age, dateOfBirth, bloodGroup, profileImage, phoneNumber, address });
+    const { userId, name, gender, age, dateOfBirth, bloodGroup, phoneNumber, address } = req.body;
+    const profileImage = req.file ? req.file.filename : null;
+
+    const profile = await Profile.create({
+      userId,
+      name,
+      gender,
+      age,
+      dateOfBirth,
+      bloodGroup,
+      profileImage,
+      phoneNumber,
+      address
+    });
     res.status(201).json(profile);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -38,7 +52,19 @@ exports.updateProfile = async (req, res) => {
   try {
     const profile = await Profile.findByPk(req.params.id);
     if (!profile) return res.status(404).json({ error: 'Profile not found' });
-    await profile.update(req.body);
+
+    // If new file uploaded, delete old file
+    let profileImage = profile.profileImage;
+    if (req.file) {
+      profileImage = req.file.filename;
+
+      if (profile.profileImage) {
+        const oldPath = path.join(__dirname, '../uploads', profile.profileImage);
+        if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+      }
+    }
+
+    await profile.update({ ...req.body, profileImage });
     res.json(profile);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -50,6 +76,13 @@ exports.deleteProfile = async (req, res) => {
   try {
     const profile = await Profile.findByPk(req.params.id);
     if (!profile) return res.status(404).json({ error: 'Profile not found' });
+
+    // Delete associated file
+    if (profile.profileImage) {
+      const filePath = path.join(__dirname, '../uploads', profile.profileImage);
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+    }
+
     await profile.destroy();
     res.json({ message: 'Profile deleted' });
   } catch (err) {

@@ -10,21 +10,17 @@ const Appointment = sequelize.define('Appointment', {
   doctorId: { type: DataTypes.INTEGER, allowNull: false },
   opdId: { type: DataTypes.INTEGER, allowNull: false },
   appointmentDate: { type: DataTypes.DATE, allowNull: false },
-  status: { type: DataTypes.ENUM('scheduled', 'completed', 'cancelled'), defaultValue: 'scheduled' },
-  notes: { type: DataTypes.TEXT, allowNull: true }
+  notes: { type: DataTypes.TEXT },
+  document: { type: DataTypes.STRING }, // filename of uploaded document
+  status: { type: DataTypes.ENUM('pending', 'completed', 'cancelled'), defaultValue: 'pending' }
 }, {
   tableName: 'appointments',
   timestamps: true
 });
 
 // Associations
-Appointment.belongsTo(User, { foreignKey: 'userId', onDelete: 'CASCADE' });
-User.hasMany(Appointment, { foreignKey: 'userId' });
-
-Appointment.belongsTo(Doctor, { foreignKey: 'doctorId', onDelete: 'CASCADE' });
-Doctor.hasMany(Appointment, { foreignKey: 'doctorId' });
-
-Appointment.belongsTo(OPD, { foreignKey: 'opdId', onDelete: 'CASCADE' });
-OPD.hasMany(Appointment, { foreignKey: 'opdId' });
+Appointment.belongsTo(User, { foreignKey: 'userId' });
+Appointment.belongsTo(Doctor, { foreignKey: 'doctorId' });
+Appointment.belongsTo(OPD, { foreignKey: 'opdId' });
 
 module.exports = Appointment;

@@ -1,4 +1,8 @@
 const Inventory = require('../models/Inventory');
+const { Parser } = require('json2csv');
+const fs = require('fs');
+const path = require('path');
+
 
 // Create new inventory item
 exports.createItem = async (req, res) => {
@@ -51,6 +55,35 @@ exports.deleteItem = async (req, res) => {
     if (!item) return res.status(404).json({ error: 'Item not found' });
     await item.destroy();
     res.json({ message: 'Item deleted' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
+//inventory csv
+
+
+exports.exportInventoryCSV = async (req, res) => {
+  try {
+    const inventory = await Inventory.findAll();
+
+    const data = inventory.map(i => ({
+      id: i.id,
+      name: i.name,
+      quantity: i.quantity,
+      category: i.category,
+      status: i.status
+    }));
+
+    const fields = ['id', 'name', 'quantity', 'category', 'status'];
+    const parser = new Parser({ fields });
+    const csv = parser.parse(data);
+
+    const filePath = path.join(__dirname, '../../uploads/inventory.csv');
+    fs.writeFileSync(filePath, csv);
+
+    res.download(filePath, 'inventory.csv');
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

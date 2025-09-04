@@ -7,7 +7,8 @@ const OPD = sequelize.define('OPD', {
   name: { type: DataTypes.STRING, allowNull: false },
   doctorId: { type: DataTypes.INTEGER, allowNull: false },
   description: { type: DataTypes.TEXT, allowNull: true },
-  status: { type: DataTypes.ENUM('active', 'inactive'), defaultValue: 'active' }
+  status: { type: DataTypes.ENUM('active', 'inactive'), defaultValue: 'active' },
+  specialization: { type: DataTypes.STRING, allowNull: true }
 }, {
   tableName: 'opds',
   timestamps: true
