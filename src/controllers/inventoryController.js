@@ -1,3 +1,4 @@
+// src/controllers/inventoryController.js
 const Inventory = require('../models/Inventory');
 const { Parser } = require('json2csv');
 const fs = require('fs');
@@ -62,28 +63,29 @@ exports.deleteItem = async (req, res) => {
 
 
 //inventory csv
-
-
 exports.exportInventoryCSV = async (req, res) => {
   try {
     const inventory = await Inventory.findAll();
 
     const data = inventory.map(i => ({
       id: i.id,
-      name: i.name,
+      // correct fields
+      itemName: i.itemName,
       quantity: i.quantity,
-      category: i.category,
+      unit: i.unit,
       status: i.status
     }));
 
-    const fields = ['id', 'name', 'quantity', 'category', 'status'];
+    const fields = ['id', 'itemName', 'quantity', 'unit', 'status'];
     const parser = new Parser({ fields });
     const csv = parser.parse(data);
 
     const filePath = path.join(__dirname, '../../uploads/inventory.csv');
     fs.writeFileSync(filePath, csv);
 
-    res.download(filePath, 'inventory.csv');
+    res.download(filePath, 'inventory.csv', err => {
+      if (err) console.error('Inventory CSV download error:', err);
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

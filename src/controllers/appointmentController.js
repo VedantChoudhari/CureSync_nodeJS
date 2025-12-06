@@ -1,3 +1,4 @@
+// src/controllers/appointmentController.js
 const { Op } = require('sequelize');
 const Appointment = require('../models/Appointment');
 const fs = require('fs');
@@ -155,8 +156,8 @@ exports.getAppointmentsByDoctorAndDate = async (req, res) => {
     }
 
     // RBAC filtering
-    if (req.user.role === 'doctor') query.doctorId = req.user.id;
-    if (req.user.role === 'patient') query.userId = req.user.id;
+    if (req.user?.role === 'doctor') query.doctorId = req.user.id;
+    if (req.user?.role === 'patient') query.userId = req.user.id;
 
     const appointments = await Appointment.findAll({
       where: query,
@@ -180,8 +181,8 @@ exports.getAppointmentsByPatientAndStatus = async (req, res) => {
     if (status) query.status = status;
 
     // RBAC filtering
-    if (req.user.role === 'patient') query.userId = req.user.id;
-    if (req.user.role === 'doctor') query.doctorId = req.user.id;
+    if (req.user?.role === 'patient') query.userId = req.user.id;
+    if (req.user?.role === 'doctor') query.doctorId = req.user.id;
 
     const appointments = await Appointment.findAll({
       where: query,
@@ -219,13 +220,12 @@ exports.exportAppointmentsCSV = async (req, res) => {
     const filePath = path.join(__dirname, '../../uploads/appointments.csv');
     fs.writeFileSync(filePath, csv);
 
-    res.download(filePath, 'appointments.csv');
+    res.download(filePath, 'appointments.csv', err => {
+      if (err) console.error('Appointments CSV download error:', err);
+      // optional: delete temp csv after sending
+      // try { fs.unlinkSync(filePath); } catch (e) { /* ignore */ }
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
-
-
-
-
-

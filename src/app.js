@@ -1,3 +1,4 @@
+// src/app.js
 const express = require('express');
 const path = require('path');
 const app = express();
@@ -5,7 +6,13 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(express.static(path.join(__dirname, '../public')));
+// Serve static frontend files (only once)
+app.use(express.static(path.join(__dirname, "../public")));
+app.get("/", (req, res) => {
+  res.sendFile(path.resolve(__dirname, "../public/index.html"));
+});
+
+// Serve uploads (single mount) - ensure uploads folder exists at project root
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Add API routes
@@ -17,6 +24,7 @@ const appointmentRoutes = require('./routes/appointmentRoutes');
 const opdRoutes = require('./routes/opdRoutes');
 const inventoryRoutes = require('./routes/inventoryRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
+
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/appointments', appointmentRoutes);
@@ -25,11 +33,5 @@ app.use('/api/doctors', doctorRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/profiles', profileRoutes);
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/index.html'));
-});
 
 module.exports = app;

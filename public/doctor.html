@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Doctor Dashboard</title>
+  <link rel="stylesheet" href="styles/styles.css">
+</head>
+<body>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h2>CureSync</h2>
+    <a href="index.html">🏠 Home</a>
+    <a href="patient.html">🧑‍⚕️ Patient</a>
+    <a href="doctor.html">👨‍⚕️ Doctor</a>
+    <a href="hospital.html">🏥 Hospital</a>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main">
+    <div class="header">
+      <h1>Doctor Dashboard</h1>
+    </div>
+
+    <div id="doctor-appointments"></div>
+  </div>
+
+  <script src="scripts/app.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      loadDoctorAppointments();
+    });
+  </script>
+</body>
+</html>

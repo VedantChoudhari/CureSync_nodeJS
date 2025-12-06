@@ -1,3 +1,4 @@
+// src/controllers/doctorController.js
 const Doctor = require('../models/Doctor');
 const { Parser } = require('json2csv');
 const fs = require('fs');
@@ -66,22 +67,28 @@ exports.exportDoctorsCSV = async (req, res) => {
     const doctors = await Doctor.findAll();
 
     const data = doctors.map(d => ({
+
       id: d.id,
       name: d.name,
       specialization: d.specialization,
       email: d.email,
-      phone: d.phone,
+      // use correct field name from model
+      phoneNumber: d.phoneNumber || '',
       status: d.status
     }));
 
-    const fields = ['id', 'name', 'specialization', 'email', 'phone', 'status'];
+    const fields = ['id', 'name', 'specialization', 'email', 'phoneNumber', 'status'];
     const parser = new Parser({ fields });
     const csv = parser.parse(data);
 
     const filePath = path.join(__dirname, '../../uploads/doctors.csv');
     fs.writeFileSync(filePath, csv);
 
-    res.download(filePath, 'doctors.csv');
+    res.download(filePath, 'doctors.csv', err => {
+      if (err) console.error('Doctor CSV download error:', err);
+      // consider cleaning temp file here if you want:
+      // fs.unlinkSync(filePath);
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
